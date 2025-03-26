@@ -1,28 +1,28 @@
 /* Syscalls
-	Open
+	Open (1024)
 		params
  		* a0 = string of path
 		* a1 = flags {0->RO, 1->WO, 9->WA}
 		returns
 		* a0 = file descriptor (-1 if error)
-	Close
+	Close (57)
 		params
 		* a0 = file descriptor
-	LSeek
+	LSeek (62)
 		params
 		* a0 = file descriptor
 		* a1 = offset
 		* a2 = flag {0->beginning, 1->curr pos, 2->EOF}
 		returns
 		* a0 = selected position from beginning of the file (-1 if error)
-	Read
+	Read (63)
 		params
 		* a0 = file descriptor
 		* a1 = address of buffer
 		* a2 = max len to read
 		returns
 		* a0 = len read (-1 if error)
-	Write
+	Write (64)
 		params
 		* a0 = file descriptor
 		* a1 = address of buffer
