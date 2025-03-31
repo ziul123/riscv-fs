@@ -223,27 +223,24 @@ int main() {
 	while (1) {
 		Sleep(100);
 		unsigned char syscall = RS232_ReadByte(cport_nr);
-		if (n == 0)	/* nao tem syscall */
-			continue
-		
-				switch (syscall) {
-					case OPEN:
-						syscall_open();
-						break;
-					case CLOSE:
-						syscall_close();
-						break;
-					case LSEEK:
-						syscall_lseek();
-						break;
-					case READ:
-						syscall_read();
-						break;
-					case WRITE:
-						syscall_write();
-						break;
-					default:
-						printf("No syscall (%hhd)\n", syscall);
-				}
+		switch (syscall) {
+			case OPEN:
+				syscall_open();
+				break;
+			case CLOSE:
+				syscall_close();
+				break;
+			case LSEEK:
+				syscall_lseek();
+				break;
+			case READ:
+				syscall_read();
+				break;
+			case WRITE:
+				syscall_write();
+				break;
+			default:
+				printf("No syscall (%hhd)\n", syscall);
+		}
 	}
 }
