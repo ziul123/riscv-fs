@@ -149,14 +149,14 @@ void syscall_lseek() {
 		printf("Erro no fseek.\n");
 		ret = -1;
 	} else
-		ret = ftell(files[fd]);
+		ret = ftell(&files[fd]);
 	RS232_SendInt(cport_nr, ret);
 }
 
 void syscall_read() {
 	int fd = RS232_ReadInt(cport_nr);
 	int n = RS232_ReadInt(cport_nr);
-	char buf[n] = {0};
+	char buf[n];
 	int count = fread(buf, 1, n, &files[fd]);
 	int r = RS232_SendBuf(cport_nr, buf, count);
 	if (r == -1)
@@ -167,9 +167,9 @@ void syscall_read() {
 int syscall_write() {
 	int fd = RS232_ReadInt(cport_nr);
 	int n = RS232_ReadInt(cport_nr);
-	char buf[n] = {0};
+	char buf[n];
 	RS232_ReadBuf(cport_nr, buf, n);
-	fwrite(buf, 1, n, %files[fd]);
+	fwrite(buf, 1, n, &files[fd]);
 }
 
 void test_communication() {
@@ -199,12 +199,12 @@ void test_communication() {
 			printf(",");
 	}
 
-	const char *str = "test";
+	unsigned char *str = {'t','e','s','t',0};
 	RS232_SendBuf(cport_nr, str, 5);
 	printf("Sent \"%s\n", str);
-	char str2[5] = {0};
+	unsigned char str2[5] = {0};
 	RS232_ReadString(cport_nr, str2);
-	printf("Received \"%s\"\n);
+	printf("Received \"%s\"\n");
 }
 
 
