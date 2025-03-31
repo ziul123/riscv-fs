@@ -199,7 +199,7 @@ void test_communication() {
 			printf(",");
 	}
 
-	unsigned char *str = {'t','e','s','t',0};
+	unsigned char str[] = {'t','e','s','t',0};
 	RS232_SendBuf(cport_nr, str, 5);
 	printf("Sent \"%s\n", str);
 	unsigned char str2[5] = {0};
@@ -222,8 +222,7 @@ int main() {
 
 	while (1) {
 		Sleep(100);
-		unsigned char syscall;
-		int n = RS232_PollComport(cport_nr, syscall, 1);
+		unsigned char syscall = RS232_ReadByte(cport_nr);
 		if (n == 0)	/* nao tem syscall */
 			continue
 		
