@@ -5,9 +5,32 @@
 # TX_ADDRESS = 0xFF200121  
 # CRTL_ADDRESS = 0xFF200122
 
+test_buf: .space 10
+
 .include "MACROSv24.s"
 
 .text
+
+# testando
+jal RS232_ReadByte
+jal RS232_SendByte
+jal RS232_ReadInt
+jal RS232_SendInt
+la a0, test_buf
+li a1, 10
+jal RS232_ReadBuf
+la a0, test_buf
+li a1, 10
+jal RS232_SendBuf
+la a0, test_buf
+li a1, 5
+jal RS232_ReadBuf
+la a0, test_buf
+jal RS232_SendString
+li a7, 10
+ecall
+
+
 
 # a0 = byte a ser transmitido
 RS232_SendByte: li t0, RS232_BASE_ADDRESS
@@ -27,17 +50,14 @@ RS232_SendInt: addi sp, sp, -8
 		sw s0, 4(sp)
 
 		mv s0, a0
-		mv t2, zero		# contador
-		li t3, 4			# maximo de iteracoes
+		li t2, 3		# contador i (vai ate 0)
 RS232_SendInt.loop:
-		neg t0, t2
-		addi t0, t0, 3
-		slli t0, t0, 3
-		srl a0, s0, t0
+		slli t0, t0, 3	# i * 8
+		srl a0, s0, t0	# a0 >> (i * 8)
 		andi a0, a0, 0x00FF
 		jal RS232_SendByte
-		addi t2, t2, 1
-		blt t2, t3, RS232_SendInt.loop
+		addi t2, t2, -1
+		bgez t2, RS232_SendInt.loop
 
 		lw s0, 4(sp)
 		lw ra, 0(sp)
@@ -82,5 +102,59 @@ RS232_SendString.end
 		addi sp, sp, 8
 		ret
 
+# Retorna
+# a0 = byte lido
+# blocking
+RS232_ReadByte: li t0, RS232_BASE_ADDRESS
+RS232_ReadByte.wait: lb t1, 2(t0)			# le o byte de controle
+		andi t1, t1, 0x04	# mascara para obter o bit ready
+		beqz t1, RS232_ReadByte.wait	# caso nao esteja ready, espere
+		lb a0, 0(t0)	# le o byte que esta em RX 
+RS232_ReadByte.wait2: lb t1, 2(t0)		# le o byte de controle
+		bnez t1, RS232_ReadByte.wait2		# espera o bit ready desativar
+		ret
+
+# Retorna
+# a0 = inteiro lido
+# big endian
+RS232_ReadInt: addi sp, sp, -8
+		sw ra, 0(sp)	# salva endereco de retorno
+		sw s0, 4(sp)
+
+		mv s0, zero
+		li t2, 3			# contador i (vai ate 0)
+RS232_ReadInt.loop:
+		jal RS232_ReadByte
+		slli t0, t2, 3	# i * 8
+		sll a0, a0, t0	# a0 << (i * 8)
+		or s0, s0, a0
+		addi t2, t2, -1
+		bgez t2, RS232_ReadInt.loop
+		mv a0, s0
+
+		lw s0, 4(sp)
+		lw ra, 0(sp)
+		addi sp, sp, 8
+		ret
+
+# a0 = endereco do buffer
+# a1 = quantidade de bytes a serem lidos
+RS232_ReadBuf: addi sp, sp, -8
+		sw ra, 0(sp)	# salva endereco de retorno
+		sw s0, 4(sp)
+
+		mv s0, a0
+		mv t2, zero		# contador
+RS232_ReadBuf.loop:
+		jal RS232_ReadByte
+		sb a0, 0(s0)
+		addi t2, t2, 1
+		addi s0, s0, 1
+		blt t2, a1, RS232_ReadBuf.loop
+
+		lw s0, 4(sp)
+		lw ra, 0(sp)
+		addi sp, sp, 8
+		ret
 
 .include "SYSTEMv24.s"
