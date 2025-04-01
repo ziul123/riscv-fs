@@ -62,8 +62,8 @@ int RS232_ReadInt(int cport_nr) {
 	/* big endian */
 	int result = 0;
 	for (int i = 3; i >= 0; i--) {
-		char aux = RS232_ReadByte(cport_nr);
-		unsigned int mask = ((unsigned int) aux) << (8 * i);
+		unsigned char aux = RS232_ReadByte(cport_nr);
+		unsigned int mask = aux << (8 * i);
 		result = result | mask;
 	}
 	return result;
