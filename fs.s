@@ -91,9 +91,9 @@ RS232_SendString: addi sp, sp, -8
 		mv s0, a0
 RS232_SendString.loop:
 		lb a0, 0(s0)
-		beqz a0, RS232_SendString.end
 		jal RS232_SendByte
-		addi a0, a0, 1
+		beqz a0, RS232_SendString.end
+		addi s0, s0, 1
 		j RS232_SendString.loop
 
 RS232_SendString.end:
