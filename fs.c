@@ -87,12 +87,10 @@ void RS232_ReadBuf(int cport_nr, unsigned char *buf, int size) {
 
 int RS232_SendInt(int cport_nr, int data) {
 	/* big endian */
-	printf("Sending int\n");
 	unsigned char buf[4];
 	for (int i = 0; i < 4; i++) {
 		unsigned char aux = (unsigned int) data >> (8 * (3 - i));
 		buf[i] = aux;
-		printf("Byte[%d] = %hhx\n", i, aux);
 	}
 	int ret = RS232_SendBuf(cport_nr, buf, 4);
 	if (ret != 4) {
@@ -184,12 +182,8 @@ void test_communication() {
 	int x = 0xf0caf0fa;
 	RS232_SendInt(cport_nr, x);
 	printf("Sent %x\n", x);
-	for (int i = 0; i < 4; i++) {
-		unsigned char x2 = RS232_ReadByte(cport_nr);
-		printf("Received %hhx\n", x2);
-	}
-//	int x2 = RS232_ReadInt(cport_nr);
-//	printf("Received %x\n", x2);
+	int x2 = RS232_ReadInt(cport_nr);
+	printf("Received %x\n", x2);
 
 	unsigned char buf[10] = {0,1,2,3,4,5,6,7,8,9};
 	RS232_SendBuf(cport_nr, buf, 10);
