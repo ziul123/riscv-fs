@@ -181,9 +181,9 @@ void test_communication() {
 
 	int x = 0xf0caf0fa;
 	RS232_SendInt(cport_nr, x);
-	printf("Sent %d\n", x);
+	printf("Sent %x\n", x);
 	int x2 = RS232_ReadInt(cport_nr);
-	printf("Received %d\n", x2);
+	printf("Received %x\n", x2);
 
 	unsigned char buf[10] = {0,1,2,3,4,5,6,7,8,9};
 	RS232_SendBuf(cport_nr, buf, 10);
