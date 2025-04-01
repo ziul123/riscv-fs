@@ -431,16 +431,16 @@ ecallException:   addi    sp, sp, -264              # Salva todos os registrador
 #		beq			t0, a7, goToIReadString
 
 
-		addi t0, zero, 1024								# ecall 1024 Open
-		beq t0, a7, goToOpen
-		addi t0, zero, 57									# ecall 57 Close
-		beq t0, a7, goToClose
-		addi t0, zero, 62									# ecall 62 LSeek
-		beq t0, a7, goToLSeek
-		addi t0, zero, 63									#ecall 63 Read
-		beq t0, a7, goToRead
-		addi t0, zero, 64									# ecall 64 Write
-		beq t0, a7, goToWrite
+#		addi t0, zero, 1024								# ecall 1024 Open
+#		beq t0, a7, goToOpen
+#		addi t0, zero, 57									# ecall 57 Close
+#		beq t0, a7, goToClose
+#		addi t0, zero, 62									# ecall 62 LSeek
+#		beq t0, a7, goToLSeek
+#		addi t0, zero, 63									#ecall 63 Read
+#		beq t0, a7, goToRead
+#		addi t0, zero, 64									# ecall 64 Write
+#		beq t0, a7, goToWrite
 
 
     jal NaoExisteEcall  # ecall inexistente
@@ -510,20 +510,20 @@ ecallException:   addi    sp, sp, -264              # Salva todos os registrador
 #	goToIReadString: jal iReadString					# chama iReadString
 #			j				endEcall
 
-	goToOpen: jal open
-			j				endEcall
-
-	goToClose: jal close
-			j				endEcall
-
-	goToLSeek: jal lSeek
-			j				endEcall
-
-	goToRead: jal read
-			j				endEcall
-
-	goToWrite: jal write
-			j				endEcall
+#	goToOpen: jal open
+#			j				endEcall
+#
+#	goToClose: jal close
+#			j				endEcall
+#
+#	goToLSeek: jal lSeek
+#			j				endEcall
+#
+#	goToRead: jal read
+#			j				endEcall
+#
+#	goToWrite: jal write
+#			j				endEcall
   		    				    		    				    		    		
 		
 

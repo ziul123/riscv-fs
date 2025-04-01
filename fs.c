@@ -209,8 +209,6 @@ void test_communication() {
 
 
 int main() {
-	test_communication();
-	return 0;
   int bdrate=115200;
   char mode[]={'8','N','2',0};
 
@@ -219,6 +217,9 @@ int main() {
     printf("Can not open comport\n");
     return(0);
   }
+
+	test_communication();
+	return 0;
 
 	while (1) {
 		Sleep(100);

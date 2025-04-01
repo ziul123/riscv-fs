@@ -40,7 +40,7 @@ RS232_SendByte.wait: lb t1, 2(t0)			# le o byte de controle
 		sb a0, 1(t0)			# escreve o byte em TX
 		li t1, 1
 		sb t1, 2(t0)			# ativa o bit start
-		sb sb zero, 2(t0)	# desativa o bit start
+		sb zero, 2(t0)	# desativa o bit start
 		ret
 
 # a0 = int a ser transmitido
@@ -96,7 +96,7 @@ RS232_SendString.loop:
 		addi a0, a0, 1
 		j RS232_SendString.loop
 
-RS232_SendString.end
+RS232_SendString.end:
 		lw s0, 4(sp)
 		lw ra, 0(sp)
 		addi sp, sp, 8
