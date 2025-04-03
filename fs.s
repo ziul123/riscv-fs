@@ -52,7 +52,7 @@ RS232_SendInt: addi sp, sp, -8
 		mv s0, a0
 		li t2, 3		# contador i (vai ate 0)
 RS232_SendInt.loop:
-		slli t0, t0, 3	# i * 8
+		slli t0, t2, 3	# i * 8
 		srl a0, s0, t0	# a0 >> (i * 8)
 		andi a0, a0, 0x00FF
 		jal RS232_SendByte
@@ -109,7 +109,7 @@ RS232_ReadByte: li t0, RS232_BASE_ADDRESS
 RS232_ReadByte.wait: lb t1, 2(t0)			# le o byte de controle
 		andi t1, t1, 0x04	# mascara para obter o bit ready
 		beqz t1, RS232_ReadByte.wait	# caso nao esteja ready, espere
-		lb a0, 0(t0)	# le o byte que esta em RX 
+		lbu a0, 0(t0)	# le o byte que esta em RX 
 RS232_ReadByte.wait2: lb t1, 2(t0)		# le o byte de controle
 		bnez t1, RS232_ReadByte.wait2		# espera o bit ready desativar
 		ret

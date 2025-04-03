@@ -10,115 +10,115 @@ BEGIN
 00000003 : 0000e073;   % 226:  	csrsi 	ustatus, 1 		# seta o bit de habilita��o de interrup��o em ustatus (reg 0)																																																				 %
 00000004 : 120000ef;   % 15: jal RS232_ReadByte %
 00000005 : 050000ef;   % 16: jal RS232_SendByte %
-00000006 : 13c000ef;   % 17: jal RS232_ReadInt %
-00000007 : 070000ef;   % 18: jal RS232_SendInt %
-00000008 : 0fc10517;   % 19: la a0, test_buf %
-00000009 : fe050513;   % 19:  %
-0000000a : 00a00593;   % 20: li a1, 10 %
-0000000b : 168000ef;   % 21: jal RS232_ReadBuf %
-0000000c : 0fc10517;   % 22: la a0, test_buf %
-0000000d : fd050513;   % 22:  %
-0000000e : 00a00593;   % 23: li a1, 10 %
-0000000f : 08c000ef;   % 24: jal RS232_SendBuf %
-00000010 : 0fc10517;   % 25: la a0, test_buf %
-00000011 : fc050513;   % 25:  %
-00000012 : 00500593;   % 26: li a1, 5 %
-00000013 : 148000ef;   % 27: jal RS232_ReadBuf %
-00000014 : 0fc10517;   % 28: la a0, test_buf %
-00000015 : fb050513;   % 28:  %
-00000016 : 0a4000ef;   % 29: jal RS232_SendString %
-00000017 : 00a00893;   % 30: li a7, 10 %
-00000018 : 00000073;   % 31: ecall %
-00000019 : ff2002b7;   % 36: RS232_SendByte: li t0, 0xFF200120 %
-0000001a : 12028293;   % 36:  %
-0000001b : 00228303;   % 37: RS232_SendByte.wait: lb t1, 2(t0)			# le o byte de controle %
-0000001c : 00237313;   % 38: 		andi t1, t1, 0x02	# mascara para obter o bit busy %
-0000001d : fe031ce3;   % 39: 		bnez t1, RS232_SendByte.wait	# caso esteja busy, espere %
-0000001e : 00a280a3;   % 40: 		sb a0, 1(t0)			# escreve o byte em TX %
-0000001f : 00100313;   % 41: 		li t1, 1 %
-00000020 : 00628123;   % 42: 		sb t1, 2(t0)			# ativa o bit start %
-00000021 : 00028123;   % 43: 		sb zero, 2(t0)	# desativa o bit start %
-00000022 : 00008067;   % 44: 		ret %
-00000023 : ff810113;   % 48: RS232_SendInt: addi sp, sp, -8 %
-00000024 : 00112023;   % 49: 		sw ra, 0(sp)	# salva endereco de retorno %
-00000025 : 00812223;   % 50: 		sw s0, 4(sp) %
-00000026 : 00a00433;   % 52: 		mv s0, a0 %
-00000027 : 00300393;   % 53: 		li t2, 3		# contador i (vai ate 0) %
-00000028 : 00329293;   % 55: 		slli t0, t0, 3	# i * 8 %
-00000029 : 00545533;   % 56: 		srl a0, s0, t0	# a0 >> (i * 8) %
-0000002a : 0ff57513;   % 57: 		andi a0, a0, 0x00FF %
-0000002b : fb9ff0ef;   % 58: 		jal RS232_SendByte %
-0000002c : fff38393;   % 59: 		addi t2, t2, -1 %
-0000002d : fe03d6e3;   % 60: 		bgez t2, RS232_SendInt.loop %
-0000002e : 00412403;   % 62: 		lw s0, 4(sp) %
-0000002f : 00012083;   % 63: 		lw ra, 0(sp) %
-00000030 : 00810113;   % 64: 		addi sp, sp, 8 %
-00000031 : 00008067;   % 65: 		ret %
-00000032 : ff810113;   % 69: RS232_SendBuf: addi sp, sp, -8 %
-00000033 : 00112023;   % 70: 		sw ra, 0(sp) %
-00000034 : 00812223;   % 71: 		sw s0, 4(sp) %
-00000035 : 00a00433;   % 73: 		mv s0, a0 %
-00000036 : 00b503b3;   % 74: 		add t2, a0, a1		# t2 = ultimo endereco + 1 %
-00000037 : 00040503;   % 76: 		lb a0, 0(s0) %
-00000038 : f85ff0ef;   % 77: 		jal RS232_SendByte %
-00000039 : 00140413;   % 78: 		addi s0, s0, 1 %
-0000003a : fe744ae3;   % 79: 		blt s0, t2, RS232_SendBuf.loop %
-0000003b : 00412403;   % 81: 		lw s0, 4(sp) %
-0000003c : 00012083;   % 82: 		lw ra, 0(sp) %
-0000003d : 00810113;   % 83: 		addi sp, sp, 8 %
-0000003e : 00008067;   % 84: 		ret %
-0000003f : ff810113;   % 87: RS232_SendString: addi sp, sp, -8 %
-00000040 : 00112023;   % 88: 		sw ra, 0(sp) %
-00000041 : 00812223;   % 89: 		sw s0, 4(sp) %
-00000042 : 00a00433;   % 91: 		mv s0, a0 %
-00000043 : 00040503;   % 93: 		lb a0, 0(s0) %
-00000044 : f55ff0ef;   % 94: 		jal RS232_SendByte %
-00000045 : 00050663;   % 95: 		beqz a0, RS232_SendString.end %
-00000046 : 00140413;   % 96: 		addi s0, s0, 1 %
-00000047 : ff1ff06f;   % 97: 		j RS232_SendString.loop %
-00000048 : 00412403;   % 100: 		lw s0, 4(sp) %
-00000049 : 00012083;   % 101: 		lw ra, 0(sp) %
-0000004a : 00810113;   % 102: 		addi sp, sp, 8 %
-0000004b : 00008067;   % 103: 		ret %
-0000004c : ff2002b7;   % 108: RS232_ReadByte: li t0, 0xFF200120 %
-0000004d : 12028293;   % 108:  %
-0000004e : 00228303;   % 109: RS232_ReadByte.wait: lb t1, 2(t0)			# le o byte de controle %
-0000004f : 00437313;   % 110: 		andi t1, t1, 0x04	# mascara para obter o bit ready %
-00000050 : fe030ce3;   % 111: 		beqz t1, RS232_ReadByte.wait	# caso nao esteja ready, espere %
-00000051 : 00028503;   % 112: 		lb a0, 0(t0)	# le o byte que esta em RX  %
-00000052 : 00228303;   % 113: RS232_ReadByte.wait2: lb t1, 2(t0)		# le o byte de controle %
-00000053 : fe031ee3;   % 114: 		bnez t1, RS232_ReadByte.wait2		# espera o bit ready desativar %
-00000054 : 00008067;   % 115: 		ret %
-00000055 : ff810113;   % 120: RS232_ReadInt: addi sp, sp, -8 %
-00000056 : 00112023;   % 121: 		sw ra, 0(sp)	# salva endereco de retorno %
-00000057 : 00812223;   % 122: 		sw s0, 4(sp) %
-00000058 : 00000433;   % 124: 		mv s0, zero %
-00000059 : 00300393;   % 125: 		li t2, 3			# contador i (vai ate 0) %
-0000005a : fc9ff0ef;   % 127: 		jal RS232_ReadByte %
-0000005b : 00339293;   % 128: 		slli t0, t2, 3	# i * 8 %
-0000005c : 00551533;   % 129: 		sll a0, a0, t0	# a0 << (i * 8) %
-0000005d : 00a46433;   % 130: 		or s0, s0, a0 %
-0000005e : fff38393;   % 131: 		addi t2, t2, -1 %
-0000005f : fe03d6e3;   % 132: 		bgez t2, RS232_ReadInt.loop %
-00000060 : 00800533;   % 133: 		mv a0, s0 %
-00000061 : 00412403;   % 135: 		lw s0, 4(sp) %
-00000062 : 00012083;   % 136: 		lw ra, 0(sp) %
-00000063 : 00810113;   % 137: 		addi sp, sp, 8 %
-00000064 : 00008067;   % 138: 		ret %
-00000065 : ff810113;   % 142: RS232_ReadBuf: addi sp, sp, -8 %
-00000066 : 00112023;   % 143: 		sw ra, 0(sp)	# salva endereco de retorno %
-00000067 : 00812223;   % 144: 		sw s0, 4(sp) %
-00000068 : 00a00433;   % 146: 		mv s0, a0 %
-00000069 : 000003b3;   % 147: 		mv t2, zero		# contador %
-0000006a : f89ff0ef;   % 149: 		jal RS232_ReadByte %
-0000006b : 00a40023;   % 150: 		sb a0, 0(s0) %
-0000006c : 00138393;   % 151: 		addi t2, t2, 1 %
-0000006d : 00140413;   % 152: 		addi s0, s0, 1 %
-0000006e : feb3c8e3;   % 153: 		blt t2, a1, RS232_ReadBuf.loop %
-0000006f : 00412403;   % 155: 		lw s0, 4(sp) %
-00000070 : 00012083;   % 156: 		lw ra, 0(sp) %
-00000071 : 00810113;   % 157: 		addi sp, sp, 8 %
-00000072 : 00008067;   % 158: 		ret %
+00000006 : 13c000ef;   % 18: jal RS232_ReadInt %
+00000007 : 070000ef;   % 50: jal RS232_SendInt %
+00000008 : 0fc10517;   % 52: la a0, test_buf %
+00000009 : fe050513;   % 52:  %
+0000000a : 00a00593;   % 53: li a1, 10 %
+0000000b : 168000ef;   % 54: jal RS232_ReadBuf %
+0000000c : 0fc10517;   % 55: la a0, test_buf %
+0000000d : fd050513;   % 55:  %
+0000000e : 00a00593;   % 56: li a1, 10 %
+0000000f : 08c000ef;   % 57: jal RS232_SendBuf %
+00000010 : 0fc10517;   % 58: la a0, test_buf %
+00000011 : fc050513;   % 58:  %
+00000012 : 00500593;   % 59: li a1, 5 %
+00000013 : 148000ef;   % 60: jal RS232_ReadBuf %
+00000014 : 0fc10517;   % 61: la a0, test_buf %
+00000015 : fb050513;   % 61:  %
+00000016 : 0a4000ef;   % 62: jal RS232_SendString %
+00000017 : 00a00893;   % 63: li a7, 10 %
+00000018 : 00000073;   % 64: ecall %
+00000019 : ff2002b7;   % 69: RS232_SendByte: li t0, 0xFF200120 %
+0000001a : 12028293;   % 69:  %
+0000001b : 00228303;   % 70: RS232_SendByte.wait: lb t1, 2(t0)			# le o byte de controle %
+0000001c : 00237313;   % 71: 		andi t1, t1, 0x02	# mascara para obter o bit busy %
+0000001d : fe031ce3;   % 72: 		bnez t1, RS232_SendByte.wait	# caso esteja busy, espere %
+0000001e : 00a280a3;   % 73: 		sb a0, 1(t0)			# escreve o byte em TX %
+0000001f : 00100313;   % 74: 		li t1, 1 %
+00000020 : 00628123;   % 75: 		sb t1, 2(t0)			# ativa o bit start %
+00000021 : 00028123;   % 76: 		sb zero, 2(t0)	# desativa o bit start %
+00000022 : 00008067;   % 77: 		ret %
+00000023 : ff810113;   % 81: RS232_SendInt: addi sp, sp, -8 %
+00000024 : 00112023;   % 82: 		sw ra, 0(sp)	# salva endereco de retorno %
+00000025 : 00812223;   % 83: 		sw s0, 4(sp) %
+00000026 : 00a00433;   % 85: 		mv s0, a0 %
+00000027 : 00300393;   % 86: 		li t2, 3		# contador i (vai ate 0) %
+00000028 : 00339293;   % 88: 		slli t0, t2, 3	# i * 8 %
+00000029 : 00545533;   % 89: 		srl a0, s0, t0	# a0 >> (i * 8) %
+0000002a : 0ff57513;   % 90: 		andi a0, a0, 0x00FF %
+0000002b : fb9ff0ef;   % 91: 		jal RS232_SendByte %
+0000002c : fff38393;   % 92: 		addi t2, t2, -1 %
+0000002d : fe03d6e3;   % 93: 		bgez t2, RS232_SendInt.loop %
+0000002e : 00412403;   % 95: 		lw s0, 4(sp) %
+0000002f : 00012083;   % 96: 		lw ra, 0(sp) %
+00000030 : 00810113;   % 97: 		addi sp, sp, 8 %
+00000031 : 00008067;   % 98: 		ret %
+00000032 : ff810113;   % 102: RS232_SendBuf: addi sp, sp, -8 %
+00000033 : 00112023;   % 103: 		sw ra, 0(sp) %
+00000034 : 00812223;   % 104: 		sw s0, 4(sp) %
+00000035 : 00a00433;   % 106: 		mv s0, a0 %
+00000036 : 00b503b3;   % 107: 		add t2, a0, a1		# t2 = ultimo endereco + 1 %
+00000037 : 00040503;   % 109: 		lb a0, 0(s0) %
+00000038 : f85ff0ef;   % 110: 		jal RS232_SendByte %
+00000039 : 00140413;   % 111: 		addi s0, s0, 1 %
+0000003a : fe744ae3;   % 112: 		blt s0, t2, RS232_SendBuf.loop %
+0000003b : 00412403;   % 114: 		lw s0, 4(sp) %
+0000003c : 00012083;   % 115: 		lw ra, 0(sp) %
+0000003d : 00810113;   % 116: 		addi sp, sp, 8 %
+0000003e : 00008067;   % 117: 		ret %
+0000003f : ff810113;   % 120: RS232_SendString: addi sp, sp, -8 %
+00000040 : 00112023;   % 121: 		sw ra, 0(sp) %
+00000041 : 00812223;   % 122: 		sw s0, 4(sp) %
+00000042 : 00a00433;   % 124: 		mv s0, a0 %
+00000043 : 00040503;   % 126: 		lb a0, 0(s0) %
+00000044 : f55ff0ef;   % 127: 		jal RS232_SendByte %
+00000045 : 00050663;   % 128: 		beqz a0, RS232_SendString.end %
+00000046 : 00140413;   % 129: 		addi s0, s0, 1 %
+00000047 : ff1ff06f;   % 130: 		j RS232_SendString.loop %
+00000048 : 00412403;   % 133: 		lw s0, 4(sp) %
+00000049 : 00012083;   % 134: 		lw ra, 0(sp) %
+0000004a : 00810113;   % 135: 		addi sp, sp, 8 %
+0000004b : 00008067;   % 136: 		ret %
+0000004c : ff2002b7;   % 141: RS232_ReadByte: li t0, 0xFF200120 %
+0000004d : 12028293;   % 141:  %
+0000004e : 00228303;   % 142: RS232_ReadByte.wait: lb t1, 2(t0)			# le o byte de controle %
+0000004f : 00437313;   % 143: 		andi t1, t1, 0x04	# mascara para obter o bit ready %
+00000050 : fe030ce3;   % 144: 		beqz t1, RS232_ReadByte.wait	# caso nao esteja ready, espere %
+00000051 : 0002c503;   % 145: 		lbu a0, 0(t0)	# le o byte que esta em RX  %
+00000052 : 00228303;   % 146: RS232_ReadByte.wait2: lb t1, 2(t0)		# le o byte de controle %
+00000053 : fe031ee3;   % 147: 		bnez t1, RS232_ReadByte.wait2		# espera o bit ready desativar %
+00000054 : 00008067;   % 148: 		ret %
+00000055 : ff810113;   % 153: RS232_ReadInt: addi sp, sp, -8 %
+00000056 : 00112023;   % 154: 		sw ra, 0(sp)	# salva endereco de retorno %
+00000057 : 00812223;   % 155: 		sw s0, 4(sp) %
+00000058 : 00000433;   % 157: 		mv s0, zero %
+00000059 : 00300393;   % 158: 		li t2, 3			# contador i (vai ate 0) %
+0000005a : fc9ff0ef;   % 160: 		jal RS232_ReadByte %
+0000005b : 00339293;   % 161: 		slli t0, t2, 3	# i * 8 %
+0000005c : 00551533;   % 162: 		sll a0, a0, t0	# a0 << (i * 8) %
+0000005d : 00a46433;   % 163: 		or s0, s0, a0 %
+0000005e : fff38393;   % 164: 		addi t2, t2, -1 %
+0000005f : fe03d6e3;   % 165: 		bgez t2, RS232_ReadInt.loop %
+00000060 : 00800533;   % 166: 		mv a0, s0 %
+00000061 : 00412403;   % 168: 		lw s0, 4(sp) %
+00000062 : 00012083;   % 169: 		lw ra, 0(sp) %
+00000063 : 00810113;   % 170: 		addi sp, sp, 8 %
+00000064 : 00008067;   % 171: 		ret %
+00000065 : ff810113;   % 175: RS232_ReadBuf: addi sp, sp, -8 %
+00000066 : 00112023;   % 176: 		sw ra, 0(sp)	# salva endereco de retorno %
+00000067 : 00812223;   % 177: 		sw s0, 4(sp) %
+00000068 : 00a00433;   % 179: 		mv s0, a0 %
+00000069 : 000003b3;   % 180: 		mv t2, zero		# contador %
+0000006a : f89ff0ef;   % 182: 		jal RS232_ReadByte %
+0000006b : 00a40023;   % 183: 		sb a0, 0(s0) %
+0000006c : 00138393;   % 184: 		addi t2, t2, 1 %
+0000006d : 00140413;   % 185: 		addi s0, s0, 1 %
+0000006e : feb3c8e3;   % 186: 		blt t2, a1, RS232_ReadBuf.loop %
+0000006f : 00412403;   % 188: 		lw s0, 4(sp) %
+00000070 : 00012083;   % 189: 		lw ra, 0(sp) %
+00000071 : 00810113;   % 190: 		addi sp, sp, 8 %
+00000072 : 00008067;   % 191: 		ret %
 00000073 : 0420d073;   % 106: 	csrwi ucause,1		# caso ocorra dropdown vai gerar exce��o de instru��o inv�lida %
 00000074 : ff810113;   % 108: ExceptionHandling:	addi 	sp, sp, -8 	# salva 2 registradores utilizados para comparar ucause %
 00000075 : 00512023;   % 109: 	sw 	t0, 0(sp) %
