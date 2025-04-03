@@ -5,11 +5,39 @@
 # TX_ADDRESS = 0xFF200121  
 # CRTL_ADDRESS = 0xFF200122
 
-test_buf: .space 10
+.eqv OPEN 1
+.eqv CLOSE 2
+.eqv LSEEK 3
+.eqv READ 4
+.eqv WRITE 5
+
+
+test_buf: .word 0,0,0
+test_file: .string "test.txt"
 
 .include "MACROSv24.s"
 
 .text
+
+# testando
+la a0, test_file
+li a1, 0
+jal Open
+mv s1, a0
+la a1, test_buf
+li a2, 5
+jal Read
+mv a0, s1
+jal Close
+la a0, test_buf
+li a1, 0
+li a2, 0
+li a3, 0x00FF
+li a7, 104
+ecall
+li a7, 10
+ecall
+
 
 # a0 = byte a ser transmitido
 RS232_SendByte: li t0, RS232_BASE_ADDRESS
@@ -147,6 +175,10 @@ RS232_ReadBuf.loop:
 Open: addi sp, sp, -4
 		sw ra, 0(sp)	# salva endereco de retorno
 
+		mv s0, a0
+		li a0, OPEN
+		jal RS232_SendByte		# manda codigo da chamada pro pc
+		mv a0, s0
 		jal RS232_SendString	# manda caminho do arquivo pro pc
 		mv a0, a1
 		jal RS232_SendByte		# manda flag pro pc
@@ -164,6 +196,10 @@ Open: addi sp, sp, -4
 Close: addi sp, sp, -4
 		sw ra, 0(sp)
 
+		mv s0, a0
+		li a0, CLOSE
+		jal RS232_SendByte	# manda o codifo da chamada pro pc
+		mv a0, s0
 		jal RS232_SendInt		# manda o descritor do arquivo pro pc 
 
 		lw ra, 0(sp)
@@ -181,6 +217,10 @@ Close: addi sp, sp, -4
 Read: addi sp, sp, -4
 		sw ra, 0(sp)
 
+		mv s0, a0
+		li a0, READ
+		jal RS232_SendByte	# manda o codigo da chamada pro pc
+		mv a0, s0
 		jal RS232_SendInt		# manda descritor do arquivo pro pc
 		mv a0, a2
 		jal RS232_SendInt		# manda quantidade de bytes a serem lidos pro pc

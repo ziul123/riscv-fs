@@ -219,9 +219,6 @@ int main() {
     return(0);
   }
 
-	test_communication();
-	return 0;
-
 	while (1) {
 		Sleep(100);
 		unsigned char syscall = RS232_ReadByte(cport_nr);
