@@ -158,6 +158,7 @@ void syscall_read() {
 	int n = RS232_ReadInt(cport_nr);
 	char buf[n];
 	int count = fread(buf, 1, n, &files[fd]);
+	RS232_SendInt(cport_nr, count);
 	int r = RS232_SendBuf(cport_nr, buf, count);
 	if (r == -1)
 		printf("Erro ao mandar bytes lidos do arquivo.\n");

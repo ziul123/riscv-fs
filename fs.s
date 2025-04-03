@@ -11,27 +11,6 @@ test_buf: .space 10
 
 .text
 
-# testando
-jal RS232_ReadByte
-jal RS232_SendByte
-jal RS232_ReadInt
-jal RS232_SendInt
-la a0, test_buf
-li a1, 10
-jal RS232_ReadBuf
-la a0, test_buf
-li a1, 10
-jal RS232_SendBuf
-la a0, test_buf
-li a1, 5
-jal RS232_ReadBuf
-la a0, test_buf
-jal RS232_SendString
-li a7, 10
-ecall
-
-
-
 # a0 = byte a ser transmitido
 RS232_SendByte: li t0, RS232_BASE_ADDRESS
 RS232_SendByte.wait: lb t1, 2(t0)			# le o byte de controle
@@ -156,5 +135,66 @@ RS232_ReadBuf.loop:
 		lw ra, 0(sp)
 		addi sp, sp, 8
 		ret
+
+##################################################
+# Open
+# a0 = endereco da string com o caminho do arquivo
+# a1 = flag (0: read only, 1: write only, 9: write append)
+#####
+# retornos
+# a0 = descritor do arquivo (-1 em caso de erro)
+################################################
+Open: addi sp, sp, -4
+		sw ra, 0(sp)	# salva endereco de retorno
+
+		jal RS232_SendString	# manda caminho do arquivo pro pc
+		mv a0, a1
+		jal RS232_SendByte		# manda flag pro pc
+
+		jal RS232_ReadInt			# le o descritor do arquivo
+
+		lw ra, 0(sp)
+		addi sp, sp, 4
+		ret
+
+#############################################
+#	Close
+# a0 = descritor do arquivo
+#########################################
+Close: addi sp, sp, -4
+		sw ra, 0(sp)
+
+		jal RS232_SendInt		# manda o descritor do arquivo pro pc 
+
+		lw ra, 0(sp)
+		addi sp, sp, 4
+
+#####################################
+# Read
+# a0 = descritor do arquivo
+# a1 = endereco do buffer onde os bytes serao escritos
+# a2 = quantidade de bytes a serem escritos
+#####
+# retorna
+# a0 = quantidade de bytes lidos
+########################################
+Read: addi sp, sp, -4
+		sw ra, 0(sp)
+
+		jal RS232_SendInt		# manda descritor do arquivo pro pc
+		mv a0, a2
+		jal RS232_SendInt		# manda quantidade de bytes a serem lidos pro pc
+
+		jal RS232_ReadInt		# le quantos bytes foram lidos
+		mv t0, a1
+		mv a1, a0
+		mv a0, t0		# a0 = endereco do buffer, a1 = quantos bytes ler
+		jal RS232_ReadBuf
+		mv a0, a1
+
+		lw ra, 0(sp)
+		addi sp, sp, 4
+		ret
+
 
 .include "SYSTEMv24.s"
