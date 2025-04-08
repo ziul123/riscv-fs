@@ -42,7 +42,7 @@
 
 #include "rs232.h"
 
-FILE files[1024] = {0};
+FILE *files[1024] = {0};
 
 enum SYSCALLS {OPEN = 1, CLOSE, LSEEK, READ, WRITE};
 
@@ -108,13 +108,13 @@ void syscall_open() {
 	/* flags {0->RO, 1->WO, 9->WA} */
 	switch (flags) {
 		case 0:
-			mode = "r";
+			mode = "rb";
 			break;
 		case 1:
-			mode = "w";
+			mode = "wb";
 			break;
 		case 9:
-			mode = "a";
+			mode = "ab";
 			break;
 	}
 	int fd;
@@ -124,7 +124,8 @@ void syscall_open() {
 		fd = -1;
 	} else {
 		fd = fileno(f);
-		files[fd] = *f;	/* salva o stream do arquivo aberto no indice do descritor do arquivo */
+		files[fd] = f;	/* salva o stream do arquivo aberto no indice do descritor do arquivo */
+		printf("Arquivo %s aberto no descritor %d com sucesso\n", filepath, fd);
 	}
 	int ret = RS232_SendInt(cport_nr, fd);
 	if (ret == -1)
@@ -134,7 +135,7 @@ void syscall_open() {
 
 void syscall_close() {
 	int fd = RS232_ReadInt(cport_nr);
-	FILE *f = &files[fd];
+	FILE *f = files[fd];
 	fclose(f);
 }
 
@@ -143,25 +144,30 @@ void syscall_lseek() {
 	int offset = RS232_ReadInt(cport_nr);
 	char w = RS232_ReadByte(cport_nr);
 	int whence[3] = {SEEK_SET, SEEK_CUR, SEEK_END};
-	int tmp = fseek(&files[fd], offset, whence[w]);
+	int tmp = fseek(files[fd], offset, whence[w]);
 	int ret;
 	if (tmp == -1) {
 		printf("Erro no fseek.\n");
 		ret = -1;
 	} else
-		ret = ftell(&files[fd]);
+		ret = ftell(files[fd]);
 	RS232_SendInt(cport_nr, ret);
 }
 
 void syscall_read() {
 	int fd = RS232_ReadInt(cport_nr);
+	printf("fd %d lido com sucesso\n", fd);
 	int n = RS232_ReadInt(cport_nr);
-	char buf[n];
-	int count = fread(buf, 1, n, &files[fd]);
+	printf("n %d lido com sucesso\n", n);
+	char buf[10] = {0};
+	int count = fread(buf, 1, n, files[fd]);
+	printf("%d bytes lidos do arquivo %d: %s\n", count, fd, buf);
 	RS232_SendInt(cport_nr, count);
 	int r = RS232_SendBuf(cport_nr, buf, count);
 	if (r == -1)
 		printf("Erro ao mandar bytes lidos do arquivo.\n");
+	else
+		printf("%d bytes mandados\n", r);
 	return;
 }
 
@@ -170,7 +176,7 @@ int syscall_write() {
 	int n = RS232_ReadInt(cport_nr);
 	char buf[n];
 	RS232_ReadBuf(cport_nr, buf, n);
-	fwrite(buf, 1, n, &files[fd]);
+	fwrite(buf, 1, n, files[fd]);
 }
 
 void test_communication() {
@@ -220,8 +226,10 @@ int main() {
   }
 
 	while (1) {
-		Sleep(100);
+		Sleep(1);
+		printf("Esperando syscall\n");
 		unsigned char syscall = RS232_ReadByte(cport_nr);
+		printf("Syscall: %hhu\n", syscall);
 		switch (syscall) {
 			case OPEN:
 				syscall_open();
