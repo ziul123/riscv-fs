@@ -33,6 +33,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <errno.h>
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -120,7 +121,7 @@ void syscall_open() {
 	int fd;
 	FILE *f = fopen(filepath, mode);
 	if (!f) {
-		perror("Erro ao abrir arquivo");
+		fprintf(stderr, "Erro ao abrir o arquivo %s: %s", filepath, strerror(errno)); 
 		fd = -1;
 	} else {
 		fd = fileno(f);
@@ -136,7 +137,9 @@ void syscall_open() {
 void syscall_close() {
 	int fd = RS232_ReadInt(cport_nr);
 	FILE *f = files[fd];
-	fclose(f);
+	int ret = fclose(f);
+	if (ret)
+		perror("Erro ao fechar o arquivo");
 }
 
 void syscall_lseek() {
@@ -147,7 +150,7 @@ void syscall_lseek() {
 	int tmp = fseek(files[fd], offset, whence[w]);
 	int ret;
 	if (tmp == -1) {
-		printf("Erro no fseek.\n");
+		fprintf(stderr, "Erro no fseek: %s\n", strerror(errno));
 		ret = -1;
 	} else
 		ret = ftell(files[fd]);
@@ -156,16 +159,16 @@ void syscall_lseek() {
 
 void syscall_read() {
 	int fd = RS232_ReadInt(cport_nr);
-	printf("fd %d lido com sucesso\n", fd);
+	printf("fd %d\n", fd);
 	int n = RS232_ReadInt(cport_nr);
-	printf("n %d lido com sucesso\n", n);
-	char buf[10] = {0};
+	printf("n %d\n", n);
+	char buf[n];
 	int count = fread(buf, 1, n, files[fd]);
-	printf("%d bytes lidos do arquivo %d: %s\n", count, fd, buf);
+	printf("%d bytes lidos\n", count);
 	RS232_SendInt(cport_nr, count);
 	int r = RS232_SendBuf(cport_nr, buf, count);
 	if (r == -1)
-		printf("Erro ao mandar bytes lidos do arquivo.\n");
+		printf("Erro ao mandar bytes lidos.\n");
 	else
 		printf("%d bytes mandados\n", r);
 	return;
@@ -173,10 +176,14 @@ void syscall_read() {
 
 int syscall_write() {
 	int fd = RS232_ReadInt(cport_nr);
+	printf("fd %d\n", fd);
 	int n = RS232_ReadInt(cport_nr);
+	printf("n %d\n", n);
 	char buf[n];
 	RS232_ReadBuf(cport_nr, buf, n);
-	fwrite(buf, 1, n, files[fd]);
+	int count = fwrite(buf, 1, n, files[fd]);
+	printf("%d bytes escritos\n", count);
+	RS232_SendInt(cport_nr, count);
 }
 
 void test_communication() {
