@@ -14,27 +14,92 @@
 
 test_buf: .word 0,0,0
 test_file: .string "test.txt"
+write_buf: .string "abcdefghij"
 
 .include "MACROSv24.s"
+
+.macro print_int(%i,%x,%y)
+mv a0, %i
+mv a1, %x
+mv a2, %y
+li a3, 0x00FF
+li a7, 101
+ecall
+.end_macro
+
+
+.macro print_str(%s,%x,%y)
+la a0, %s
+mv a1, %x
+mv a2, %y
+li a3, 0x00FF
+li a7, 104
+ecall
+.end_macro
+
+
+.macro print_char(%c,%x,%y)
+mv a0, %c
+mv a1, %x
+mv a2, %y
+li a3, 0x00FF
+li a4, 0
+li a7, 111
+ecall
+.end_macro
 
 .text
 
 # testando
+li a0, 0
+li a1, 0
+li a7, 48
+ecall
+
+la a0, test_file
+li a1, 9
+jal Open
+mv s1, a0
+la a1, write_buf
+li a2, 10
+jal Write
+mv a0, s1
+jal Close
+
 la a0, test_file
 li a1, 0
 jal Open
 mv s1, a0
+li a1, 1
+li a2, 0
+jal LSeek
+mv a0, s1
 la a1, test_buf
-li a2, 5
+li a2, 3
 jal Read
+print_str(test_buf, zero, zero)
+mv a0, s1
+li a1, 1
+li a2, 1
+jal LSeek
+mv a0, s1
+la a1, test_buf
+li a2, 3
+jal Read
+li t0, 8
+print_str(test_buf, zero, t0)
+mv a0, s1
+li a1, -4
+li a2, 2
+jal LSeek
+mv a0, s1
+la a1, test_buf
+li a2, 3
+jal Read
+li t0, 16
+print_str(test_buf, zero, t0)
 mv a0, s1
 jal Close
-la a0, test_buf
-li a1, 0
-li a2, 0
-li a3, 0x00FF
-li a7, 104
-ecall
 li a7, 10
 ecall
 
@@ -150,6 +215,7 @@ RS232_ReadBuf: addi sp, sp, -8
 		sw ra, 0(sp)	# salva endereco de retorno
 		sw s0, 4(sp)
 
+		mv s5, a1
 		mv s0, a0
 		mv t2, zero		# contador
 RS232_ReadBuf.loop:
@@ -157,7 +223,7 @@ RS232_ReadBuf.loop:
 		sb a0, 0(s0)
 		addi t2, t2, 1
 		addi s0, s0, 1
-		blt t2, a1, RS232_ReadBuf.loop
+		blt t2, s5, RS232_ReadBuf.loop
 
 		lw s0, 4(sp)
 		lw ra, 0(sp)
@@ -198,18 +264,48 @@ Close: addi sp, sp, -4
 
 		mv s0, a0
 		li a0, CLOSE
-		jal RS232_SendByte	# manda o codifo da chamada pro pc
+		jal RS232_SendByte	# manda o codigo da chamada pro pc
 		mv a0, s0
 		jal RS232_SendInt		# manda o descritor do arquivo pro pc 
 
 		lw ra, 0(sp)
 		addi sp, sp, 4
+		ret
+
+
+#####################################
+# LSeek
+# a0 = descritor do arquivo
+# a1 = offset
+# a2 = whence (0: inicio, 1: posicao atual, 2: final)
+#####
+# retorna
+# a0 = posicao no arquivo a partir do inicio
+########################################
+LSeek: addi sp, sp, -4
+		sw ra, 0(sp)
+
+		mv s0, a0
+		li a0, LSEEK
+		jal RS232_SendByte	# manda o codigo da chamada pro pc
+		mv a0, s0
+		jal RS232_SendInt		# manda o descritor do arquivo pro pc 
+		mv a0, a1
+		jal RS232_SendInt		# manda offset pro pc
+		mv a0, a2
+		jal RS232_SendByte	# manda whence pro pc
+
+		jal RS232_ReadInt		# le a posicao final no arquivo
+
+		lw ra, 0(sp)
+		addi sp, sp, 4
+		ret
 
 #####################################
 # Read
 # a0 = descritor do arquivo
 # a1 = endereco do buffer onde os bytes serao escritos
-# a2 = quantidade de bytes a serem escritos
+# a2 = quantidade de bytes a serem lidos
 #####
 # retorna
 # a0 = quantidade de bytes lidos
@@ -226,11 +322,41 @@ Read: addi sp, sp, -4
 		jal RS232_SendInt		# manda quantidade de bytes a serem lidos pro pc
 
 		jal RS232_ReadInt		# le quantos bytes foram lidos
-		mv t0, a1
-		mv a1, a0
-		mv a0, t0		# a0 = endereco do buffer, a1 = quantos bytes ler
-		jal RS232_ReadBuf
+		mv s0, a0
 		mv a0, a1
+		mv a1, s0
+		jal RS232_ReadBuf
+		mv a0, s0
+
+		lw ra, 0(sp)
+		addi sp, sp, 4
+		ret
+
+#####################################
+# Write
+# a0 = descritor do arquivo
+# a1 = endereco do buffer com os bytes que serao escritos
+# a2 = quantidade de bytes a serem escritos
+#####
+# retorna
+# a0 = quantidade de bytes escritos
+########################################
+Write: addi sp, sp, -4
+		sw ra, 0(sp)
+
+		mv s0, a0
+		li a0, WRITE
+		jal RS232_SendByte	# manda o codigo da chamada pro pc
+		mv a0, s0
+		jal RS232_SendInt		# manda descritor do arquivo pro pc
+		mv a0, a2
+		jal RS232_SendInt		# manda quantidade de bytes a serem escritos pro pc
+
+		mv a0, a1
+		mv a1, a2
+		jal RS232_SendBuf		# manda bytes a serem escritos pro pc
+
+		jal RS232_ReadInt		# le quantos bytes foram escritos
 
 		lw ra, 0(sp)
 		addi sp, sp, 4
