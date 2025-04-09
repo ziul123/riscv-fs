@@ -144,8 +144,11 @@ void syscall_close() {
 
 void syscall_lseek() {
 	int fd = RS232_ReadInt(cport_nr);
+	printf("fd: %d\n", fd);
 	int offset = RS232_ReadInt(cport_nr);
+	printf("offset: %d\n", offset);
 	char w = RS232_ReadByte(cport_nr);
+	printf("whence: %d\n", w);
 	int whence[3] = {SEEK_SET, SEEK_CUR, SEEK_END};
 	int tmp = fseek(files[fd], offset, whence[w]);
 	int ret;
@@ -159,9 +162,9 @@ void syscall_lseek() {
 
 void syscall_read() {
 	int fd = RS232_ReadInt(cport_nr);
-	printf("fd %d\n", fd);
+	printf("fd: %d\n", fd);
 	int n = RS232_ReadInt(cport_nr);
-	printf("n %d\n", n);
+	printf("n: %d\n", n);
 	char buf[n];
 	int count = fread(buf, 1, n, files[fd]);
 	printf("%d bytes lidos\n", count);
@@ -176,51 +179,15 @@ void syscall_read() {
 
 int syscall_write() {
 	int fd = RS232_ReadInt(cport_nr);
-	printf("fd %d\n", fd);
+	printf("fd: %d\n", fd);
 	int n = RS232_ReadInt(cport_nr);
-	printf("n %d\n", n);
+	printf("n: %d\n", n);
 	char buf[n];
 	RS232_ReadBuf(cport_nr, buf, n);
 	int count = fwrite(buf, 1, n, files[fd]);
 	printf("%d bytes escritos\n", count);
 	RS232_SendInt(cport_nr, count);
 }
-
-void test_communication() {
-	unsigned char c = 10;
-	RS232_SendByte(cport_nr, c);
-	printf("Sent %hhu\n", c);
-	unsigned char c2 = RS232_ReadByte(cport_nr);
-	printf("Received %hhu\n", c2);
-
-	int x = 0xf0caf0fa;
-	RS232_SendInt(cport_nr, x);
-	printf("Sent %x\n", x);
-	int x2 = RS232_ReadInt(cport_nr);
-	printf("Received %x\n", x2);
-
-	unsigned char buf[10] = {0,1,2,3,4,5,6,7,8,9};
-	RS232_SendBuf(cport_nr, buf, 10);
-	printf("Sent 0,1,2,3,4,5,6,7,8,9\n");
-	unsigned char buf2[10] = {0};
-	RS232_ReadBuf(cport_nr, buf2, 10);
-	printf("Received ");
-	for (int i = 0; i < 10; i++) {
-		printf("%hhu", buf2[i]);
-		if (buf2[i] == 9)
-			printf("\n");
-		else
-			printf(",");
-	}
-
-	unsigned char str[] = {'t','e','s','t',0};
-	RS232_SendBuf(cport_nr, str, 5);
-	printf("Sent \"%s\"\n", str);
-	unsigned char str2[5] = {0};
-	RS232_ReadString(cport_nr, str2);
-	printf("Received \"%s\"\n", str2);
-}
-
 
 int main() {
   int bdrate=115200;
