@@ -104,7 +104,9 @@ int RS232_SendInt(int cport_nr, int data) {
 void syscall_open() {
 	char filepath[255];
 	RS232_ReadString(cport_nr, filepath);
+	printf("filepath: %s\n", filepath);
 	char flags = RS232_ReadByte(cport_nr);
+	printf("flags: %hhd\n", flags);
 	const char *mode;
 	/* flags {0->RO, 1->WO, 9->WA} */
 	switch (flags) {
@@ -121,7 +123,7 @@ void syscall_open() {
 	int fd;
 	FILE *f = fopen(filepath, mode);
 	if (!f) {
-		fprintf(stderr, "Erro ao abrir o arquivo %s: %s", filepath, strerror(errno)); 
+		fprintf(stderr, "Erro ao abrir o arquivo %s: %s\n", filepath, strerror(errno)); 
 		fd = -1;
 	} else {
 		fd = fileno(f);
