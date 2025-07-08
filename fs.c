@@ -47,7 +47,7 @@ FILE *files[1024] = {0};
 
 enum SYSCALLS {OPEN = 1, CLOSE, LSEEK, READ, WRITE};
 
-int cport_nr = 3; /* usar o número da COM - 1 */
+int cport_nr; /* número da COM - 1 */
 
 char RS232_ReadByte(int cport_nr) {
 	char result;
@@ -191,7 +191,9 @@ int syscall_write() {
 	RS232_SendInt(cport_nr, count);
 }
 
-int main() {
+int main(int argc, char **argv) {
+  if (argc == 2) cport_nr = atoi(argv[1]);
+  else puts("o primeiro argumento deve ser o numero da COM - 1"); return 1;
   int bdrate=115200;
   char mode[]={'8','N','2',0};
 
