@@ -193,7 +193,7 @@ int syscall_write() {
 
 int main(int argc, char **argv) {
   if (argc == 2) cport_nr = atoi(argv[1]);
-  else puts("o primeiro argumento deve ser o numero da COM - 1"); return 1;
+  else {puts("o primeiro argumento deve ser o numero da COM - 1"); return 1;}
   int bdrate=115200;
   char mode[]={'8','N','2',0};
 
