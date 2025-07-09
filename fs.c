@@ -179,7 +179,7 @@ void syscall_read() {
 	return;
 }
 
-int syscall_write() {
+void syscall_write() {
 	int fd = RS232_ReadInt(cport_nr);
 	printf("fd: %d\n", fd);
 	int n = RS232_ReadInt(cport_nr);
